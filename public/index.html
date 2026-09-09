@@ -1,1 +1,729 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Eroco — Personal Music Library</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      :root {
+        --bg: #0b0b0d;
+        --panel: #131316;
+        --panel2: #19191d;
+        --text: #f5f5f5;
+        --muted: #92929a;
+        --line: #28282e;
+        --accent: #d7ff4f;
+      }
+      body {
+        font-family:
+          Inter,
+          system-ui,
+          -apple-system,
+          Segoe UI,
+          sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        min-height: 100vh;
+      }
+      button,
+      input {
+        font: inherit;
+      }
+      button {
+        cursor: pointer;
+        border: 0;
+      }
+      .app {
+        display: flex;
+        min-height: 100vh;
+      }
+      .sidebar {
+        width: 230px;
+        border-right: 1px solid var(--line);
+        padding: 25px 16px;
+        position: fixed;
+        inset: 0 auto 0 0;
+        background: #0d0d0f;
+      }
+      .brand {
+        font-size: 25px;
+        font-weight: 800;
+        letter-spacing: -1px;
+        padding: 0 12px 35px;
+      }
+      .brand span {
+        color: var(--accent);
+      }
+      .nav {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+      }
+      .nav button {
+        background: transparent;
+        color: #888891;
+        text-align: left;
+        padding: 12px;
+        border-radius: 10px;
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        font-size: 14px;
+      }
+      .nav button:hover,
+      .nav button.active {
+        background: #1a1a1e;
+        color: white;
+      }
+      .nav button.active {
+        font-weight: 600;
+      }
+      .nav .icon {
+        width: 21px;
+        text-align: center;
+        font-size: 17px;
+      }
+      .main {
+        margin-left: 230px;
+        flex: 1;
+        padding-bottom: 105px;
+      }
+      .topbar {
+        height: 75px;
+        border-bottom: 1px solid var(--line);
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        padding: 0 35px;
+        gap: 9px;
+        position: sticky;
+        top: 0;
+        background: rgba(11, 11, 13, 0.88);
+        backdrop-filter: blur(15px);
+        z-index: 5;
+      }
+      .iconbtn {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: transparent;
+        color: #aaa;
+        font-size: 18px;
+      }
+      .iconbtn:hover {
+        background: #1d1d21;
+        color: #fff;
+      }
+      .content {
+        max-width: 1180px;
+        margin: auto;
+        padding: 42px 35px;
+      }
+      h1 {
+        font-size: 34px;
+        letter-spacing: -1.3px;
+      }
+      .sub {
+        color: var(--muted);
+        margin-top: 7px;
+        font-size: 14px;
+      }
+      .section {
+        margin-top: 38px;
+      }
+      .section-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 15px;
+      }
+      .section h2 {
+        font-size: 18px;
+      }
+      .cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+        gap: 14px;
+      }
+      .card {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 16px;
+        transition: 0.2s;
+      }
+      .card:hover {
+        transform: translateY(-2px);
+        border-color: #3b3b43;
+      }
+      .cover {
+        height: 145px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #27272c, #101014);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 38px;
+        margin-bottom: 13px;
+      }
+      .card h3 {
+        font-size: 14px;
+      }
+      .card p {
+        font-size: 12px;
+        color: var(--muted);
+        margin-top: 5px;
+      }
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: #202025;
+        color: #bbb;
+        border-radius: 20px;
+        padding: 5px 9px;
+        font-size: 11px;
+        margin-top: 10px;
+      }
+      .upload {
+        border: 1px dashed #44444b;
+        background: #111114;
+        min-height: 145px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        color: #aaa;
+      }
+      .upload strong {
+        color: white;
+      }
+      .upload input {
+        display: none;
+      }
+      .searchbox {
+        display: flex;
+        gap: 10px;
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 12px 15px;
+        margin-top: 25px;
+      }
+      .searchbox input {
+        background: none;
+        border: 0;
+        outline: 0;
+        color: white;
+        width: 100%;
+      }
+      .profile-cover {
+        height: 115px;
+        background: linear-gradient(110deg, #222229, #121216);
+        border-radius: 16px;
+        margin-bottom: -42px;
+      }
+      .profile {
+        position: relative;
+        padding: 0 25px 25px;
+      }
+      .avatar {
+        width: 82px;
+        height: 82px;
+        border-radius: 50%;
+        background: #25252a;
+        border: 4px solid var(--bg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        font-weight: 700;
+      }
+      .profile-info {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+      }
+      .profile h2 {
+        margin-top: 10px;
+      }
+      .stats {
+        display: flex;
+        gap: 35px;
+        text-align: center;
+      }
+      .stats b {
+        display: block;
+        font-size: 20px;
+      }
+      .stats span {
+        font-size: 11px;
+        color: var(--muted);
+      }
+      .btn {
+        background: white;
+        color: #111;
+        padding: 10px 15px;
+        border-radius: 9px;
+        font-weight: 650;
+        font-size: 13px;
+      }
+      .btn.dark {
+        background: #222228;
+        color: white;
+      }
+      .btn.accent {
+        background: var(--accent);
+      }
+      .toolbar {
+        display: flex;
+        gap: 9px;
+      }
+      .toolbar .btn {
+        margin-top: 0;
+      }
+      .player {
+        position: fixed;
+        bottom: 0;
+        left: 230px;
+        right: 0;
+        height: 82px;
+        background: rgba(18, 18, 21, 0.96);
+        border-top: 1px solid var(--line);
+        display: flex;
+        align-items: center;
+        padding: 0 24px;
+        gap: 20px;
+        z-index: 10;
+      }
+      .now {
+        width: 250px;
+        display: flex;
+        align-items: center;
+        gap: 11px;
+      }
+      .mini {
+        width: 47px;
+        height: 47px;
+        border-radius: 7px;
+        background: #29292e;
+        display: grid;
+        place-items: center;
+      }
+      .now small {
+        display: block;
+        color: var(--muted);
+        font-size: 11px;
+        margin-top: 3px;
+      }
+      .controls {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+      }
+      .play {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: white;
+        color: #111;
+      }
+      .progress {
+        height: 3px;
+        background: #333;
+        border-radius: 5px;
+        flex: 1;
+        position: relative;
+      }
+      .progress i {
+        display: block;
+        width: 28%;
+        height: 100%;
+        background: white;
+        border-radius: 5px;
+      }
+      .time {
+        font-size: 11px;
+        color: #777;
+      }
+      .page {
+        display: none;
+      }
+      .page.active {
+        display: block;
+      }
+      .empty {
+        padding: 55px 20px;
+        text-align: center;
+        border: 1px dashed #333;
+        border-radius: 14px;
+        color: #777;
+      }
+      .toast {
+        position: fixed;
+        right: 25px;
+        bottom: 100px;
+        background: #fff;
+        color: #111;
+        padding: 12px 16px;
+        border-radius: 10px;
+        font-size: 13px;
+        display: none;
+        z-index: 20;
+      }
+      @media (max-width: 750px) {
+        .sidebar {
+          width: 68px;
+          padding: 20px 8px;
+        }
+        .brand {
+          font-size: 0;
+          text-align: center;
+          padding: 5px 0 30px;
+        }
+        .brand span {
+          font-size: 22px;
+        }
+        .nav button {
+          justify-content: center;
+        }
+        .nav button span:last-child {
+          display: none;
+        }
+        .main {
+          margin-left: 68px;
+        }
+        .player {
+          left: 68px;
+        }
+        .now {
+          width: auto;
+          min-width: 150px;
+        }
+        .progress {
+          display: none;
+        }
+        .content {
+          padding: 30px 18px;
+        }
+        .topbar {
+          padding: 0 15px;
+        }
+        .stats {
+          gap: 15px;
+        }
+        .profile-info {
+          align-items: flex-start;
+          gap: 15px;
+          flex-direction: column;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <aside class="sidebar">
+        <div class="brand"><span>e</span>roco</div>
+        <nav class="nav">
+          <button class="active" data-page="home">
+            <span class="icon">⌂</span><span>Home</span>
+          </button>
+          <button data-page="search">
+            <span class="icon">⌕</span><span>Search</span>
+          </button>
+          <button data-page="library">
+            <span class="icon">♫</span><span>Library</span>
+          </button>
+          <button data-page="account">
+            <span class="icon">○</span><span>Account</span>
+          </button>
+        </nav>
+      </aside>
 
+      <main class="main">
+        <header class="topbar">
+          <button
+            class="iconbtn"
+            title="Notifications"
+            onclick="toast('No new notifications')"
+          >
+            ♧
+          </button>
+          <button
+            class="iconbtn"
+            title="Inbox"
+            onclick="toast('Your inbox is empty')"
+          >
+            ✉
+          </button>
+        </header>
+
+        <div class="content">
+          <section id="home" class="page active">
+            <h1>Good afternoon.</h1>
+            <p class="sub">Your music, your library, your space.</p>
+            <div class="section">
+              <div class="section-head"><h2>Recent activity</h2></div>
+              <div class="cards" id="homeCards"></div>
+            </div>
+            <div class="section">
+              <div class="section-head"><h2>Quick upload</h2></div>
+              <label class="card upload"
+                ><strong>＋ Add music</strong><span>MP3, WAV, M4A and more</span
+                ><input
+                  type="file"
+                  accept="audio/*"
+                  multiple
+                  onchange="handleFiles(this.files)"
+              /></label>
+            </div>
+          </section>
+
+          <section id="search" class="page">
+            <h1>Search</h1>
+            <p class="sub">Find public libraries and music.</p>
+            <div class="searchbox">
+              <span>⌕</span
+              ><input
+                id="searchInput"
+                placeholder="Search libraries, artists or users..."
+                oninput="filterCards()"
+              />
+            </div>
+            <div class="section">
+              <div class="section-head"><h2>Public libraries</h2></div>
+              <div class="cards searchable" id="searchCards"></div>
+            </div>
+          </section>
+
+          <section id="library" class="page">
+            <h1>Your Library</h1>
+            <p class="sub">Libraries you've created or added.</p>
+            <div class="section">
+              <div class="toolbar">
+                <button class="btn accent" onclick="newLibrary()">
+                  ＋ New library
+                </button>
+              </div>
+            </div>
+            <div class="section">
+              <div class="cards" id="libraryCards"></div>
+            </div>
+          </section>
+
+          <section id="account" class="page">
+            <h1>Account</h1>
+            <p class="sub">Manage your profile and libraries.</p>
+            <div class="section">
+              <div class="profile-cover"></div>
+              <div class="profile">
+                <div class="profile-info">
+                  <div>
+                    <div class="avatar">R</div>
+                    <h2>Rana</h2>
+                    <p class="sub">@rana</p>
+                  </div>
+                  <button
+                    class="btn dark"
+                    onclick="toast('Profile editor opened')"
+                  >
+                    Edit profile
+                  </button>
+                </div>
+                <div
+                  class="stats"
+                  style="margin-top: 25px; justify-content: flex-start"
+                >
+                  <div><b>128</b><span>Followers</span></div>
+                  <div><b id="libCount">0</b><span>Libraries</span></div>
+                  <div><b>Lo-fi</b><span>Top genre</span></div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
+
+    <div class="player">
+      <div class="now">
+        <div class="mini">♫</div>
+        <div>
+          <b id="trackName">Nothing playing</b
+          ><small id="trackArtist">Choose a song</small>
+        </div>
+      </div>
+      <div class="controls">
+        <button class="iconbtn">↶</button
+        ><button class="play" id="playBtn" onclick="togglePlay()">▶</button
+        ><button class="iconbtn">↷</button>
+      </div>
+      <div class="progress"><i id="progress"></i></div>
+      <span class="time" id="time">0:00</span>
+    </div>
+    <div class="toast" id="toast"></div>
+
+    <script>
+      let audio = null,
+        playing = false;
+
+      const nav = document.querySelectorAll(".nav button"),
+        pages = document.querySelectorAll(".page");
+      nav.forEach(
+        (btn) =>
+          (btn.onclick = () => {
+            nav.forEach((x) => x.classList.remove("active"));
+            btn.classList.add("active");
+            pages.forEach((p) => p.classList.remove("active"));
+            document.getElementById(btn.dataset.page).classList.add("active");
+          }),
+      );
+
+      function toast(msg) {
+        const t = document.getElementById("toast");
+        t.textContent = msg;
+        t.style.display = "block";
+        clearTimeout(window.tt);
+        window.tt = setTimeout(() => (t.style.display = "none"), 2200);
+      }
+
+      // Fetch Libraries from Database
+      async function loadLibraries() {
+        try {
+          const res = await fetch("/api/libraries");
+          const data = await res.json();
+
+          const libContainer = document.getElementById("libraryCards");
+          const homeContainer = document.getElementById("homeCards");
+          const searchContainer = document.getElementById("searchCards");
+
+          if (libContainer) libContainer.innerHTML = "";
+          if (homeContainer) homeContainer.innerHTML = "";
+          if (searchContainer) searchContainer.innerHTML = "";
+
+          document.getElementById("libCount").textContent = data.length;
+
+          data.forEach((item) => {
+            const cardHtml = `
+        <div class="card">
+          <div class="cover">♫</div>
+          <h3>${escapeHtml(item.name)}</h3>
+          <p>${item.tracksCount} tracks · ${item.owner}</p>
+          <span class="pill">${item.isPublic ? "Public" : "Private"}</span>
+        </div>`;
+
+            if (libContainer)
+              libContainer.insertAdjacentHTML("beforeend", cardHtml);
+            if (homeContainer)
+              homeContainer.insertAdjacentHTML("beforeend", cardHtml);
+            if (item.isPublic && searchContainer)
+              searchContainer.insertAdjacentHTML("beforeend", cardHtml);
+          });
+        } catch (err) {
+          console.error("Failed to load libraries", err);
+        }
+      }
+
+      // Create New Library to Database
+      async function newLibrary() {
+        const name = prompt("Library name:");
+        if (!name) return;
+        const isPublic = confirm(
+          "Make this library public? OK = Public, Cancel = Private",
+        );
+
+        try {
+          const res = await fetch("/api/libraries", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name, isPublic }),
+          });
+          if (res.ok) {
+            toast("Library created in database!");
+            loadLibraries();
+          }
+        } catch (err) {
+          toast("Error creating library");
+        }
+      }
+
+      // Local File Upload & Playback
+      function handleFiles(files) {
+        if (!files.length) return;
+        [...files].forEach((file) => {
+          const url = URL.createObjectURL(file);
+          if (!audio) {
+            audio = new Audio(url);
+            document.getElementById("trackName").textContent =
+              file.name.replace(/\.[^.]+$/, "");
+            document.getElementById("trackArtist").textContent = "Local upload";
+            audio.onended = () => {
+              playing = false;
+              document.getElementById("playBtn").textContent = "▶";
+            };
+          }
+        });
+        toast(files.length + " track(s) ready to play");
+      }
+
+      function togglePlay() {
+        if (!audio) {
+          toast("Upload a song first");
+          return;
+        }
+        if (playing) {
+          audio.pause();
+          playing = false;
+          document.getElementById("playBtn").textContent = "▶";
+        } else {
+          audio.play();
+          playing = true;
+          document.getElementById("playBtn").textContent = "Ⅱ";
+        }
+      }
+
+      function filterCards() {
+        const q = document.getElementById("searchInput").value.toLowerCase();
+        document.querySelectorAll(".searchable .card").forEach((c) => {
+          c.style.display = c.innerText.toLowerCase().includes(q)
+            ? "block"
+            : "none";
+        });
+      }
+
+      function escapeHtml(s) {
+        return s.replace(
+          /[&<>"']/g,
+          (c) =>
+            ({
+              "&": "&amp;",
+              "<": "&lt;",
+              ">": "&gt;",
+              '"': "&quot;",
+              "'": "&#039;",
+            })[c],
+        );
+      }
+
+      setInterval(() => {
+        if (audio && !isNaN(audio.duration)) {
+          document.getElementById("progress").style.width =
+            (audio.currentTime / audio.duration) * 100 + "%";
+          document.getElementById("time").textContent =
+            Math.floor(audio.currentTime / 60) +
+            ":" +
+            String(Math.floor(audio.currentTime % 60)).padStart(2, "0");
+        }
+      }, 500);
+
+      // Load data on page launch
+      loadLibraries();
+    </script>
+  </body>
+</html>
